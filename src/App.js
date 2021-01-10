@@ -2,11 +2,11 @@ import React, { Component } from 'react';
 import './styles/App.css';
 import AppBar from 'material-ui/AppBar';
 import LoginComponent from './components/login/LoginComponent';
-import NoteComponent from './components/note/NoteComponent';
-import NoteListComponent from './components/note/NoteListComponent';
+import PersonComponent from './components/person/PersonComponent';
+import PersonListComponent from './components/person/PersonListComponent';
 import { createMuiTheme, MuiThemeProvider } from 'material-ui/styles';
 import FetchUtil from './utils/FetchUtil';
-import NoteListToolbar from './components/note/NoteListToolbar';
+import PersonListToolbar from './components/person/PersonListToolbar';
 import CustomSnackBar from './components/custom/CustomSnackBar';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import Tooltip from "@material-ui/core/Tooltip";
@@ -16,35 +16,35 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      noteList: [],
+      personList: [],
       openLogin: true,
-      openNote: false,
-      showNoteList: false,
+      openPerson: false,
+      showPersonList: false,
       loading: false,
       userToken: '',
       snackBarOpen: false,
       vertical: 'top',
       horizontal: 'center',
       actionType: 'create',
-      noteModel: {
-        noteId: '',
-        category: '',
-        noteText: ''
+      personModel: {
+        personId: '',
+        fName: '',
+        lName: ''
       }
     }
   }
 
-  handleNoteSubmit = (note, event) => {
+  handlePersonSubmit = (person, event) => {
     event.preventDefault();
-    //build note payload
-    const noteUrl = "/note"
-    const noteBody =  {
-        "noteId": note.noteId,
-        "category": note.category,
-        "noteText": note.noteText
+    //build person payload
+    const personUrl = "/person"
+    const personBody =  {
+        "personId": person.personId,
+        "fName": person.fName,
+        "lName": person.lName
     }
     this.setState({loading: true});
-    var response = FetchUtil.handlePost(noteUrl, this.state.userToken, noteBody)
+    var response = FetchUtil.handlePost(personUrl, this.state.userToken, personBody)
         .then(response => {
             if (response.status === 200) {
                 console.log("Success***");
@@ -57,88 +57,88 @@ class App extends Component {
         }); 
   }
 
-  handleLoginSuccess = (notes, user, openLogin) => {
+  handleLoginSuccess = (persons, user, openLogin) => {
     console.log('handleLoginSuccess()');
     this.setState({userToken: user});
     this.setState({openLogin: openLogin});
-    this.setState({noteList: this.buildNoteList(notes, this.getFormattedDate)});
-    this.toggleNoteList();
+    this.setState({personList: this.buildPersonList(persons, this.getFormattedDate)});
+    this.togglePersonList();
   }
 
   handleCRUDSuccess = (action) => {
     console.log("handleCRUDSuccess action:"+action);
     this.setState({
-      openNote : false, 
-      noteModel : this.resetNoteModel,
+      openPerson : false, 
+      personModel : this.resetPersonModel,
       actionType: action
     });
-    this.refreshNoteList();
+    this.refreshPersonList();
   }
 
   handleError = (message) => {
-    console.log('NoteComponent handleError()');
-    if(this.props.openNote === true) {
+    console.log('PersonComponent handleError()');
+    if(this.props.openPerson === true) {
         this.setState({ error: message});
     }
   }
 
-  buildNoteList = (notes, dateFormatter) => {
-    var noteList = [];
-    notes.map(function(note) { 
-      note.saveDate = dateFormatter(note.saveDate);
-      noteList.push(note);
+  buildPersonList = (persons, dateFormatter) => {
+    var personList = [];
+    persons.map(function(person) { 
+      person.saveDate = dateFormatter(person.saveDate);
+      personList.push(person);
     })
-    // noteList.push([note.noteId,note.category,note.noteText, dateFormatter(note.saveDate)]);
+    // personList.push([person.personId,person.fName,person.lName, dateFormatter(person.saveDate)]);
 
-    return noteList;
+    return personList;
   }
     
-  refreshNoteList = () => {
-    console.log("refreshNoteList()");
-    var url = "/notes";
+  refreshPersonList = () => {
+    console.log("refreshPersonList()");
+    var url = "/persons";
     var result = FetchUtil.handleGet(url, this.state.userToken);
     result
     .then(response => response.json())
     .then(json => {
      // this.setState({loading: false});
       this.setState({snackBarOpen: true});
-      this.setState({noteList: this.buildNoteList(json, this.getFormattedDate)});
+      this.setState({personList: this.buildPersonList(json, this.getFormattedDate)});
     })
     .catch((error) => {
       return error;
     });
   }
 
-  toggleNoteList = () => {
-    if (this.state.showNoteList == true) {
-      this.setState({showNoteList: false});
+  togglePersonList = () => {
+    if (this.state.showPersonList == true) {
+      this.setState({showPersonList: false});
     } else {
-      this.setState({showNoteList: true});
+      this.setState({showPersonList: true});
     }
   }
 
-  resetNoteModel = () => {
+  resetPersonModel = () => {
     this.setState({
-      noteModel: {
-        noteId: '',
-        category: '',
-        noteText: ''
+      personModel: {
+        personId: '',
+        fName: '',
+        lName: ''
       }
     });
   }
 
-  getNoteFormData = (updateNoteModel) => {
-    if (updateNoteModel.noteId) {
+  getPersonFormData = (updatePersonModel) => {
+    if (updatePersonModel.personId) {
       console.log("updating node model");
-      this.setState({noteModel: {
-        noteId: updateNoteModel.noteId,
-        category: updateNoteModel.category,
-        noteText: updateNoteModel.noteText
+      this.setState({personModel: {
+        personId: updatePersonModel.personId,
+        fName: updatePersonModel.fName,
+        lName: updatePersonModel.lName
       }, actionType: "update"});
     } else {
       this.setState({actionType: "create"});
     }
-    this.setState({openNote: true});
+    this.setState({openPerson: true});
   }
 
   getFormattedDate = (rawDate) => {
@@ -157,13 +157,13 @@ class App extends Component {
   }
 
   getSnackbarMsg = () => {
-    var noteAction = 'created';
+    var personAction = 'created';
     if (this.state.actionType === 'update') {
-      noteAction = 'updated';
+      personAction = 'updated';
     } else if (this.state.actionType === 'delete') {
-      noteAction = 'deleted'
+      personAction = 'deleted'
     }
-    var msg = 'Success! Note '+noteAction+'.'
+    var msg = 'Success! Person '+personAction+'.'
     return msg;
   }
 
@@ -171,10 +171,10 @@ class App extends Component {
     this.setState({snackBarOpen: false});
   }
 
-  closeNote = () => {
-    console.log('close note');
-    this.refreshNoteList();
-    this.setState({openNote: false});
+  closePerson = () => {
+    console.log('close person');
+    this.refreshPersonList();
+    this.setState({openPerson: false});
   }
 
   setSelectedRows = (rowData) => {
@@ -190,9 +190,9 @@ class App extends Component {
       
       <MuiThemeProvider>
         <div className="App">
-          <AppBar title="Nerd Notes" showMenuIconButton={false} className={"AppBar"}>
-            <Tooltip title="Add Note" aria-label="add">
-              <AddCircleIcon onClick={this.getNoteFormData} className={"addNoteIcon"}/>
+          <AppBar title="Nerd Persons" showMenuIconButton={false} className={"AppBar"}>
+            <Tooltip title="Add Person" aria-label="add">
+              <AddCircleIcon onClick={this.getPersonFormData} className={"addPersonIcon"}/>
             </Tooltip>
           </AppBar> 
           <CustomSnackBar 
@@ -207,22 +207,22 @@ class App extends Component {
               openLogin={this.state.openLogin}
               handleSuccess={this.handleLoginSuccess}
             />}   
-          {this.state.showNoteList && 
-            <NoteListComponent 
+          {this.state.showPersonList && 
+            <PersonListComponent 
               handleSuccess={this.handleCRUDSuccess} 
               userToken={this.state.userToken} 
-              notes={this.state.noteList}
+              persons={this.state.personList}
               setSelectedRows={this.setSelectedRows}
-              getNoteFormData={this.getNoteFormData}
+              getPersonFormData={this.getPersonFormData}
             />}    
-          {this.state.openNote &&
-            <NoteComponent 
+          {this.state.openPerson &&
+            <PersonComponent 
               user={this.state.userToken} 
-              openNote={this.state.openNote}
+              openPerson={this.state.openPerson}
               handleSuccess={this.handleCRUDSuccess}s
-              noteModel={this.state.noteModel}
-              handleNoteSubmit={this.handleNoteSubmit}
-              handleClose={this.closeNote}
+              personModel={this.state.personModel}
+              handlePersonSubmit={this.handlePersonSubmit}
+              handleClose={this.closePerson}
             />}     
         </div>
        </MuiThemeProvider>

@@ -9,7 +9,6 @@ function CustomTextField({ InputLabelProps = {}, ...props }) {
       margin="dense"
       variant="outlined"
       fullWidth
-      //className="noteClass"
     />
   );
 }

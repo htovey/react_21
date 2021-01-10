@@ -96,26 +96,26 @@
   color: purple;
 }
 
-.noteClass {}
+.personClass {}
 
-.noteClass label {
+.personClass label {
   font-size: 1.3rem;
   font-weight: bold;
   color: #465294;
 }
 
-.noteClass div {
+.personClass div {
   /* padding: 5px; */
   margin: 8px auto;
 }
 
-.noteDialog div {
+.personDialog div {
   margin: 8px auto;
 }
 
-.noteListClass {}
+.personListClass {}
 
-.noteListClass table thead {
+.personListClass table thead {
   background-color: azure;
 }
 
@@ -146,7 +146,7 @@
   background-color: initial;
 }
 
-.noteListClass .MuiTableHead-root {
+.personListClass .MuiTableHead-root {
   background-color: azure;
 }
 
