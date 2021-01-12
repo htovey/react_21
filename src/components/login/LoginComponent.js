@@ -25,7 +25,7 @@ class LoginComponent extends Component {
     }
 
     handleLoginSuccess(json, userToken) {
-        this.setState({styleClass: 'hideMe'});
+        this.setState({openLogin: false});
         this.props.handleSuccess(json, userToken, false);
     }
 
@@ -55,14 +55,14 @@ class LoginComponent extends Component {
         if (this.validLogin(username, password)) {
             event.preventDefault();
             //build login payload
-            const loginUrl = "/notes";
+            const loginUrl = "/login";
             const userToken = "Basic "+base64.encode(username+":"+password)
             var response = FetchUtil.handleGet(loginUrl, userToken);
             response
-            .then(response => response.json())
-            .then(json => {
-                console.log("LoginComponent handleClick() response");
-                this.handleLoginSuccess(json, userToken);
+            //.then(response => response.json())
+           // .then(json => {
+            .then(response => {
+                this.handleLoginSuccess(response, userToken);
             })    
             .catch((error) => {
                 this.handleLoginError('Login failed. Please try again.');

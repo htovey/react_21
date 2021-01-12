@@ -93,7 +93,7 @@ export default class NoteFormDialog extends Component {
     return (
      
         <Dialog 
-          open={this.props.openNote}
+          open={this.props.openPerson}
           maxWidth="md"
           aria-labelledby="form-dialog-title">
           <DialogContent className={"personDialog"}>

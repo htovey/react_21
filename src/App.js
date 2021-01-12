@@ -57,11 +57,11 @@ class App extends Component {
         }); 
   }
 
-  handleLoginSuccess = (persons, user, openLogin) => {
+  handleLoginSuccess = (persons, user) => {
     console.log('handleLoginSuccess()');
     this.setState({userToken: user});
-    this.setState({openLogin: openLogin});
-    this.setState({personList: this.buildPersonList(persons, this.getFormattedDate)});
+    this.setState({openLogin: false});
+  //  this.setState({personList: this.buildPersonList(persons, this.getFormattedDate)});
     this.togglePersonList();
   }
 
