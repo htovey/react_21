@@ -1,5 +1,6 @@
 class PersonModel {
-    userId = '';
+    id = '';
+    userName = '';
     fName = '';
     lName = '';
     saveDate = '';

@@ -45,7 +45,7 @@ export default function LoginFormDialog (props) {
               required
               inputRef={el => unameRef = el}
               label="User Id"
-              defaultValue={"ht5"}
+              defaultValue={"ht6"}
             />
              <CustomTextField
               name="password"

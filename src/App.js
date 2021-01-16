@@ -11,6 +11,7 @@ import CustomSnackBar from './components/custom/CustomSnackBar';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import Tooltip from "@material-ui/core/Tooltip";
 import WaitModalComponent from './components/modals/WaitModalComponent';
+import Dashboard  from './components/dashboard/Dashboard';
 
 class App extends Component {
   constructor() {
@@ -19,6 +20,7 @@ class App extends Component {
       personList: [],
       openLogin: true,
       openPerson: false,
+      showDashboard: false,
       showPersonList: false,
       loading: false,
       userToken: '',
@@ -27,7 +29,8 @@ class App extends Component {
       horizontal: 'center',
       actionType: 'create',
       personModel: {
-        personId: '',
+        id: '',
+        userName: '',
         fName: '',
         lName: ''
       }
@@ -39,7 +42,8 @@ class App extends Component {
     //build person payload
     const personUrl = "/person"
     const personBody =  {
-        "personId": person.personId,
+        "id": person.id || "",
+        "userName": person.userName,
         "fName": person.fName,
         "lName": person.lName
     }
@@ -57,19 +61,21 @@ class App extends Component {
         }); 
   }
 
-  handleLoginSuccess = (persons, user, openLogin) => {
-    console.log('handleLoginSuccess()');
+  handleLoginSuccess = (person, user) => {
+    console.log('handleLoginSuccess()'+person.fName);
+    this.setPersonModel(person);
     this.setState({userToken: user});
-    this.setState({openLogin: openLogin});
-    this.setState({personList: this.buildPersonList(persons, this.getFormattedDate)});
-    this.togglePersonList();
+    this.setState({openLogin: false});
+    this.setState({showDashboard: true});
+   // this.setState({personList: this.buildPersonList(persons, this.getFormattedDate)});
+   // this.togglePersonList();
   }
 
   handleCRUDSuccess = (action) => {
     console.log("handleCRUDSuccess action:"+action);
     this.setState({
       openPerson : false, 
-      personModel : this.resetPersonModel,
+      //personModel : this.setPersonModel,
       actionType: action
     });
     this.refreshPersonList();
@@ -88,7 +94,7 @@ class App extends Component {
       person.saveDate = dateFormatter(person.saveDate);
       personList.push(person);
     })
-    // personList.push([person.personId,person.fName,person.lName, dateFormatter(person.saveDate)]);
+    // personList.push([person.id,person.fName,person.lName, dateFormatter(person.saveDate)]);
 
     return personList;
   }
@@ -117,24 +123,40 @@ class App extends Component {
     }
   }
 
-  resetPersonModel = () => {
+  setPersonModel = (person) => {
+    // var id = '';
+    // var userName = '';
+    // var fname = '';
+    // var lname = '';
+
+    // if (person) {
+    var id = person ? person.id : '';
+    var username = person ? person.userName : '';
+    var fname = person ? person.fName : '';
+    var lname = person ? person.lName : '';
+    // }
+
     this.setState({
       personModel: {
-        personId: '',
-        fName: '',
-        lName: ''
+        id: id,
+        userName: username,
+        fName: fname,
+        lName: lname
       }
     });
   }
 
   getPersonFormData = (updatePersonModel) => {
-    if (updatePersonModel.personId) {
+    if (updatePersonModel.id) {
       console.log("updating node model");
       this.setState({personModel: {
-        personId: updatePersonModel.personId,
+        id: updatePersonModel.id,
+        userName: updatePersonModel.userName,
         fName: updatePersonModel.fName,
         lName: updatePersonModel.lName
       }, actionType: "update"});
+    } else if (this.state.personModel) {
+      this.setState({actionType: "update"});
     } else {
       this.setState({actionType: "create"});
     }
@@ -171,10 +193,16 @@ class App extends Component {
     this.setState({snackBarOpen: false});
   }
 
-  closePerson = () => {
-    console.log('close person');
-    this.refreshPersonList();
-    this.setState({openPerson: false});
+  togglePerson = (update) => {
+    console.log('toggle person');
+    if(!update) {
+      this.setPersonModel();
+    }
+
+    if (this.state.showPersonList) {
+      this.refreshPersonList()
+    };
+    this.setState({openPerson: !this.state.openPerson});
   }
 
   setSelectedRows = (rowData) => {
@@ -191,9 +219,6 @@ class App extends Component {
       <MuiThemeProvider>
         <div className="App">
           <AppBar title="Nerd Persons" showMenuIconButton={false} className={"AppBar"}>
-            <Tooltip title="Add Person" aria-label="add">
-              <AddCircleIcon onClick={this.getPersonFormData} className={"addPersonIcon"}/>
-            </Tooltip>
           </AppBar> 
           <CustomSnackBar 
             open={this.state.snackBarOpen} 
@@ -205,8 +230,14 @@ class App extends Component {
           {this.state.openLogin &&
             <LoginComponent 
               openLogin={this.state.openLogin}
-              handleSuccess={this.handleLoginSuccess}
+              handleLoginSuccess={this.handleLoginSuccess}
             />}   
+
+          {this.state.showDashboard &&
+            <Dashboard 
+              viewProfile={this.togglePerson}
+              getPersonFormData={this.getPersonFormData}
+            />}  
           {this.state.showPersonList && 
             <PersonListComponent 
               handleSuccess={this.handleCRUDSuccess} 
@@ -222,7 +253,7 @@ class App extends Component {
               handleSuccess={this.handleCRUDSuccess}s
               personModel={this.state.personModel}
               handlePersonSubmit={this.handlePersonSubmit}
-              handleClose={this.closePerson}
+              handleClose={this.togglePerson}
             />}     
         </div>
        </MuiThemeProvider>

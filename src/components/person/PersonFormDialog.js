@@ -12,77 +12,70 @@ import Select from '@material-ui/core/Select';
 import { CATEGORIES } from '../../constants/Categories'
 import WaitModalComponent from '../modals/WaitModalComponent';
 
-export default class NoteFormDialog extends Component {
+export default class PersonFormDialog extends Component {
 
   constructor(props) {
     super(props);
     this.state={
-      categoryInput: '',
-      personTextInput: '',
-      placeHolder: '',
-      categoryList: this.buildCategoryList(),
+      userNameInput: '',
+      firstNameInput: '',
+      lastNameInput: '',
+      placeHolder: ''
     }
-   }
+   } 
 
-  buildCategoryList = () => {
-    let catList = CATEGORIES.map(function(category, i) {
-      if (category.value === '') {
-      return <MenuItem classes={{"root": "disabledItem"}} disabled key={category.value} value={category.value}>{category.label}</MenuItem>
-      }
-       return <MenuItem key={category.value} value={category.value}>{category.label}</MenuItem>
-    });
-    return catList;
-  } 
+  // getFnameValue = () => { 
+  //   let val = '';
+  //   let stateFname = this.state.firstNameInput;
+  //   let modelFname = this.props.personModel.fName;
+  //   if(stateFname !== '') {
+  //     //always use state value if it has been set
+  //     val = stateFname;
+  //   } else if (modelFname) {
+  //     //use model value when editing existing person, where state has not been set
+  //     val = modelFname;
+  //   }
+  //   //return default empty value if neither state nor model has been set 
+  //   console.log('set fname val to: '+val);
+  //   return val;
+  // }
 
-  getCategoryValue = () => { 
-    let val = '';
-    let stateCat = this.state.categoryInput;
-    let modelCat = this.props.personModel.category;
-    if(stateCat !== '') {
-      //always use state value if it has been set
-      val = stateCat;
-    } else if (modelCat) {
-      //use model value when editing existing person, where state has not been set
-      val = modelCat;
-    }
-    //return default empty value if neither state nor model has been set 
-    console.log('set cat val to: '+val);
-    return val;
-  }
-
-  getCategoryStyleClass = () => {
-    if (this.state.categoryInput === '' && !this.props.personModel.category) {
-      return "disabledItem";
-    } else {
-      return "selectedItem";
-    }
-  }
+  // getCategoryStyleClass = () => {
+  //   if (this.state.categoryInput === '' && !this.props.personModel.category) {
+  //     return "disabledItem";
+  //   } else {
+  //     return "selectedItem";
+  //   }
+  // }
  
   handleSubmit = (e) => {
       e.preventDefault();
-      var person = this.populateNoteModel();
-      this.props.handleNoteValSubmit(person, e);  
+      var person = this.updatePersonModel();
+      this.props.handlePersonValSubmit(person, e);  
   }
 
-  handleSelect = (e) => {
-    this.setState({ categoryInput: e.target.value });   
-  }
+  // handleSelect = (e) => {
+  //   this.setState({ categoryInput: e.target.value });   
+  // }
 
   handleCancel = () => {
-   // this.resetFormState();
     console.log('handleCancel');
-    return this.props.handleClose();
+    return this.props.handleClose;
   }
 
-  populateNoteModel = () => {
+  updatePersonModel = () => {
     var personModel = this.props.personModel;
-    
-    if (this.state.categoryInput) {
-      personModel.category = this.state.categoryInput;
+
+    if (this.state.userNameInput) {
+      personModel.userName = this.state.userNameInput;
     }
 
-    if (this.state.personTextInput) {
-      personModel.personText = this.state.personTextInput;
+    if (this.state.firstNameInput) {
+      personModel.fName = this.state.firstNameInput;
+    }
+
+    if (this.state.lastNameInput) {
+      personModel.lName = this.state.lastNameInput;
     }  
 
     return personModel;
@@ -93,34 +86,33 @@ export default class NoteFormDialog extends Component {
     return (
      
         <Dialog 
-          open={this.props.openNote}
+          open={this.props.openPerson}
           maxWidth="md"
           aria-labelledby="form-dialog-title">
           <DialogContent className={"personDialog"}>
             <StyledContent>
               {this.props.error}
-            </StyledContent>
-            <Select
-              value={this.getCategoryValue()}
-              displayEmpty
-              onChange={ (e) => this.handleSelect(e) }
-              name="category"
-              className={this.getCategoryStyleClass()}
-              variant="outlined"
-              margin="dense"
+            </StyledContent>  
+            <CustomTextField
+              name="userName"
               required
-              fullWidth
-            >
-              {this.state.categoryList}
-            </Select>    
+              defaultValue={this.props.personModel.userName || ''}
+              onChange={(e) => this.setState({userNameInput: e.target.value})}
+              label="User Id"
+            />          
              <CustomTextField
-              name="personText"
+              name="firstName"
               required
-              defaultValue={this.props.personModel.personText || ''}
-              onChange={(e) => this.setState({personTextInput: e.target.value})}
-              label="Note"
-              multiline
-              rows="15"
+              defaultValue={this.props.personModel.fName || ''}
+              onChange={(e) => this.setState({firstNameInput: e.target.value})}
+              label="First Name"
+            />
+            <CustomTextField
+              name="lastName"
+              required
+              defaultValue={this.props.personModel.lName || ''}
+              onChange={(e) => this.setState({lastNameInput: e.target.value})}
+              label="Last Name"
             />
          
           </DialogContent>

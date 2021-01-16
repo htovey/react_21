@@ -24,9 +24,9 @@ class PersonComponent extends Component {
             this.setState({error: ''});
         }
 
-        if (prevProps.user !== this.props.user) {
-            this.setState({user: this.props.user});
-        }
+        // if (prevProps.user !== this.props.user) {
+        //     this.setState({user: this.props.user});
+        // }
     }
 
     handleError(message) {
@@ -44,14 +44,9 @@ class PersonComponent extends Component {
     };
 
     validPerson = (person) => {
-        if (!person.category && !person.personText) {
-            this.handleError('Please provide Category and text input');
-            return false;
-        } else if (!person.category) {
-            this.handleError('Please select a category.');    
-        } else if (!person.personText) {
-            this.handleError('Please enter person text');
-        }else {
+        if (!person.fName || !person.lName || !person.userName) {
+            this.handleError('Please fill out all fields.');
+        } else {
             //make sure any previous error is cleared
             this.setState({error: ''});
             return true;
