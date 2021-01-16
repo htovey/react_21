@@ -24,10 +24,10 @@ class LoginComponent extends Component {
         }
     }
 
-    // handleLoginSuccess(json, userToken) {
-        
-    //     this.props.handleSuccess(json, userToken, false);
-    // }
+    handleLoginSuccess(json, userToken) {
+        this.setState({openLogin: false});
+        this.props.handleSuccess(json, userToken, false);
+    }
 
     handleLoginError(message) {
         console.log('LoginComponent handleError()');

@@ -78,8 +78,8 @@
   },
   "scripts": {
     "start": "node scripts/start.js --no-cache",
-    "local": "REACT_APP_API_URL=http://localhost:8080 node scripts/start.js",
-    "remote": "REACT_APP_API_URL=http://34.68.202.207:8080  node scripts/start.js",
+    "local": "SET REACT_APP_API_URL=http://localhost:8080&node scripts/start.js",
+    "remote": "SET REACT_APP_API_URL=http://34.68.202.207:8080&node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
     "deploy": "node scripts/build.js gh-pages -d"
