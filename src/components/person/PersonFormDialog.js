@@ -20,6 +20,7 @@ export default class PersonFormDialog extends Component {
       userNameInput: '',
       firstNameInput: '',
       lastNameInput: '',
+      passwordInput: '',
       placeHolder: ''
     }
    } 
@@ -66,10 +67,6 @@ export default class PersonFormDialog extends Component {
   updatePersonModel = () => {
     var personModel = this.props.personModel;
 
-    if (this.state.userNameInput) {
-      personModel.userName = this.state.userNameInput;
-    }
-
     if (this.state.firstNameInput) {
       personModel.fName = this.state.firstNameInput;
     }
@@ -89,17 +86,29 @@ export default class PersonFormDialog extends Component {
           open={this.props.openPerson}
           maxWidth="md"
           aria-labelledby="form-dialog-title">
+            {this.state.login &&
           <DialogContent className={"personDialog"}>
             <StyledContent>
               {this.props.error}
             </StyledContent>  
+            
             <CustomTextField
               name="userName"
               required
               defaultValue={this.props.personModel.userName || ''}
               onChange={(e) => this.setState({userNameInput: e.target.value})}
               label="User Id"
-            />          
+            />        
+            <CustomTextField
+              name="password"
+              required
+              defaultValue={this.props.personModel.userName || ''}
+              onChange={(e) => this.setState({passwordInput: e.target.value})}
+              label="Password"
+            /> 
+            </DialogContent> }
+            { this.state.profile &&
+            <DialogContent>
              <CustomTextField
               name="firstName"
               required
@@ -115,7 +124,7 @@ export default class PersonFormDialog extends Component {
               label="Last Name"
             />
          
-          </DialogContent>
+          </DialogContent>}
           <DialogActions>
             <Button onClick={this.handleSubmit} color="primary">
                 Save

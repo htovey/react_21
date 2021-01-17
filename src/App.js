@@ -42,13 +42,17 @@ class App extends Component {
     //build person payload
     const personUrl = "/person"
     const personBody =  {
+      "person" : {
         "id": person.id || "",
-        "userName": person.userName,
         "fName": person.fName,
         "lName": person.lName
+      }, "user" : {
+        "userName": person.userName,
+        "password": person.password,
+      }
     }
     this.setState({loading: true});
-    var response = FetchUtil.handlePost(personUrl, this.state.userToken, personBody)
+    var response = FetchUtil.handlePost(personUrl, this.state.userToken, JSON.stringify(personBody))
         .then(response => {
             if (response.status === 200) {
                 console.log("Success***");

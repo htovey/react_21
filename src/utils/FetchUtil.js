@@ -21,10 +21,10 @@ const handlePost = (methodUrl, userToken, payload) => {
         method: "POST",
         headers: {
             "Content-Type" : "application/json",
-            "Accept": "text/html;charset=UTF-8",
+            "Accept": "*.*",
             "Authorization" : userToken
         },
-        body: JSON.stringify(payload)
+        body: payload
     });
 
     return result;
