@@ -7,6 +7,7 @@ import CardActions from '@material-ui/core/CardActions';
 import Typography from '@material-ui/core/Typography';
 import { Button } from '@material-ui/core';
 import '../../styles/Dashboard.css';
+import BizDashboardComponent from './biz/BizDashboardComponent';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -19,28 +20,43 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-class Dashboard extends Component {
+class DashboardComponent extends Component {
   constructor(props) {
      super(props);
+     this.state = {
+       loginModel: {
+         userName: props.appLoginModel.userName,
+         password: props.appLoginModel.password,
+         roleType: props.appLoginModel.roleType
+       },
+       openBiz: false
+     }
   }
   
-  editPerson = (updatePerson) => {
-    this.props.getPersonFormData(updatePerson);
-    this.props.viewProfile(true);
+  setLoginModel = () => {
+    if (this.props.appLoginModel.roleType === 'SUPER') {
+      this.setState({loginModel: this.props.appLoginModel});
+    }
+  }
+
+  editBiz = () => {
+    this.props.getBizData();
+    this.props.vieBizProfile("update");
   } 
-
-  createLogin = () => {
-    
-  }
-
-  createPerson = () => {
-    this.props.viewProfile(false);
-  }
 
    render () {
       var classes = useStyles;
       return (
         <div className={classes.root}>
+          {this.state.loginModel.roleType === 'SUPER' && 
+            <BizDashboardComponent
+              loginModel={this.state.loginModel}
+              //bizModel={this.state.bizModel}
+              adminId={this.props.adminId}
+              userToken={this.props.userToken}
+              handleSubmit={this.props.handleSubmit}
+              togglePerson={this.props.togglePerson}
+            />}
             <Grid >
                 <Grid container spacing={2}>
                   <Grid item xs={2}>
@@ -54,6 +70,7 @@ class Dashboard extends Component {
                       </CardActions>
                     </Card>
                   </Grid>
+                  {this.props.adminId !== '' &&
                   <Grid item xs={2}>
                     <Card className={classes.paper}>
                       <Typography>
@@ -61,19 +78,19 @@ class Dashboard extends Component {
                       </Typography>
                       <CardActions>
                         <Button onClick={this.props.getPersonList}>View</Button>
-                        <Button onClick={this.createPerson}>Add Profile</Button>
-                        <Button onClick={this.createLogin}>Create Account</Button>
+                        <Button onClick={this.props.togglePerson}>Add Profile</Button>
                       </CardActions>
                     </Card>
-                  </Grid>
+                  </Grid>}
                 </Grid>
                 <Grid container spacing={2}>
                   <Grid item xs={2}>
                     <Card className={classes.paper}>Time Entry</Card>
                   </Grid>
+                  {this.props.adminId !== '' &&
                   <Grid item xs={2}>
                     <Card className={classes.paper}>Team Time Entry</Card>
-                  </Grid>
+                  </Grid>}
                 </Grid>
             </Grid>
         </div>
@@ -81,4 +98,4 @@ class Dashboard extends Component {
    }
 }
 
-export default Dashboard;
+export default DashboardComponent;

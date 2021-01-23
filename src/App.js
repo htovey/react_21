@@ -11,7 +11,7 @@ import CustomSnackBar from './components/custom/CustomSnackBar';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import Tooltip from "@material-ui/core/Tooltip";
 import WaitModalComponent from './components/modals/WaitModalComponent';
-import Dashboard  from './components/dashboard/Dashboard';
+import DashboardComponent  from './components/dashboard/DashboardComponent';
 
 class App extends Component {
   constructor() {
@@ -24,37 +24,33 @@ class App extends Component {
       showPersonList: false,
       loading: false,
       userToken: '',
+      adminId: '',
       snackBarOpen: false,
       vertical: 'top',
       horizontal: 'center',
       actionType: 'create',
       personModel: {
         id: '',
-        userName: '',
         fName: '',
-        lName: ''
+        lName: '',
+        adminId: ''
+      },
+      loginModel: {
+        userName: '',
+        password: '',
+        roleType: ''
       }
     }
   }
 
-  handlePersonSubmit = (person, event) => {
+  handleSubmit = (url, payload, event) => {
     event.preventDefault();
     //build person payload
-    const personUrl = "/person"
-    const personBody =  {
-      "person" : {
-        "id": person.id || "",
-        "fName": person.fName,
-        "lName": person.lName
-      }, "user" : {
-        "userName": person.userName,
-        "password": person.password,
-      }
-    }
+    
     this.setState({loading: true});
-    var response = FetchUtil.handlePost(personUrl, this.state.userToken, JSON.stringify(personBody))
+    var response = FetchUtil.handlePost(url, this.state.userToken, JSON.stringify(payload))
         .then(response => {
-            if (response.status === 200) {
+            if (response.status === 200 || response.status === 201) {
                 console.log("Success***");
                 this.handleCRUDSuccess(this.state.actionType);
             }
@@ -65,10 +61,11 @@ class App extends Component {
         }); 
   }
 
-  handleLoginSuccess = (person, user) => {
-    console.log('handleLoginSuccess()'+person.fName);
-    this.setPersonModel(person);
-    this.setState({userToken: user});
+  handleLoginSuccess = (json, token) => {
+   // console.log('handleLoginSuccess()'+json.person.fName);
+    this.setPersonModel(json.person);
+    this.setLoginModel(json.user);
+    this.setState({userToken: token});
     this.setState({openLogin: false});
     this.setState({showDashboard: true});
    // this.setState({personList: this.buildPersonList(persons, this.getFormattedDate)});
@@ -82,7 +79,8 @@ class App extends Component {
       //personModel : this.setPersonModel,
       actionType: action
     });
-    this.refreshPersonList();
+    this.setState({snackBarOpen: true});
+   // this.refreshPersonList();
   }
 
   handleError = (message) => {
@@ -111,7 +109,7 @@ class App extends Component {
     .then(response => response.json())
     .then(json => {
      // this.setState({loading: false});
-      this.setState({snackBarOpen: true});
+     // this.setState({snackBarOpen: true});
       this.setState({personList: this.buildPersonList(json, this.getFormattedDate)});
     })
     .catch((error) => {
@@ -138,6 +136,7 @@ class App extends Component {
     var username = person ? person.userName : '';
     var fname = person ? person.fName : '';
     var lname = person ? person.lName : '';
+    var adminid = person ? person.adminId : '';
     // }
 
     this.setState({
@@ -145,19 +144,40 @@ class App extends Component {
         id: id,
         userName: username,
         fName: fname,
-        lName: lname
+        lName: lname,
+        adminId: adminid
       }
     });
   }
 
+  setLoginModel = (loginModel) => {
+    if (loginModel && this.state.loginModel.userName === '') {
+      this.setState({loginModel: {
+        userName: loginModel.userName,
+        password: loginModel.password,
+        roleType: loginModel.roleType,
+      }});
+      if (loginModel.roleType === 'SUPER' || loginModel.roleType === 'ADMIN') {
+        this.setState({adminId: loginModel.userId});
+      }
+    } else if (!loginModel) {
+      this.setState({loginModel: {
+        userName: '',
+        password: '',
+        roleType: ''
+      }});
+    }
+  }
+
   getPersonFormData = (updatePersonModel) => {
-    if (updatePersonModel.id) {
+    if (updatePersonModel) {
       console.log("updating node model");
       this.setState({personModel: {
         id: updatePersonModel.id,
         userName: updatePersonModel.userName,
         fName: updatePersonModel.fName,
-        lName: updatePersonModel.lName
+        lName: updatePersonModel.lName,
+        adminId: updatePersonModel.adminId
       }, actionType: "update"});
     } else if (this.state.personModel) {
       this.setState({actionType: "update"});
@@ -197,15 +217,17 @@ class App extends Component {
     this.setState({snackBarOpen: false});
   }
 
-  togglePerson = (update) => {
+  togglePerson = (toggleActionType) => {
     console.log('toggle person');
-    if(!update) {
+    if(toggleActionType === "create") {
       this.setPersonModel();
+      this.setLoginModel();
     }
 
     if (this.state.showPersonList) {
       this.refreshPersonList()
     };
+    this.setState({actionType: toggleActionType});
     this.setState({openPerson: !this.state.openPerson});
   }
 
@@ -238,9 +260,15 @@ class App extends Component {
             />}   
 
           {this.state.showDashboard &&
-            <Dashboard 
-              viewProfile={this.togglePerson}
+            <DashboardComponent 
+              togglePerson={this.togglePerson}
               getPersonFormData={this.getPersonFormData}
+              handleCRUDSuccess={this.handleCRUDSuccess}
+              adminId={this.state.adminId}
+              appLoginModel={this.state.loginModel}
+              appPersonModel={this.state.personModel}
+              userToken={this.state.userToken}
+              handleSubmit={this.handleSubmit}
             />}  
           {this.state.showPersonList && 
             <PersonListComponent 
@@ -252,12 +280,15 @@ class App extends Component {
             />}    
           {this.state.openPerson &&
             <PersonComponent 
-              user={this.state.userToken} 
+              userToken={this.state.userToken} 
+              adminId={this.state.adminId}
               openPerson={this.state.openPerson}
               handleSuccess={this.handleCRUDSuccess}s
               personModel={this.state.personModel}
-              handlePersonSubmit={this.handlePersonSubmit}
+              loginModel={this.state.loginModel}
+              handlePersonSubmit={this.handleSubmit}
               handleClose={this.togglePerson}
+              actionType={this.state.actionType}
             />}     
         </div>
        </MuiThemeProvider>

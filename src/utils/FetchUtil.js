@@ -6,8 +6,7 @@
         headers: {
             "Content-Type" : "application/json",
             "Accept": "application/json",
-            "Authorization" : userToken,
-            "Connection": "close"
+            "Authorization" : userToken
         }
     });
    
@@ -21,7 +20,7 @@ const handlePost = (methodUrl, userToken, payload) => {
         method: "POST",
         headers: {
             "Content-Type" : "application/json",
-            "Accept": "*.*",
+            "Accept": "application/json",
             "Authorization" : userToken
         },
         body: payload

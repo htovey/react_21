@@ -17,65 +17,127 @@ export default class PersonFormDialog extends Component {
   constructor(props) {
     super(props);
     this.state={
+      error: '',
       userNameInput: '',
       firstNameInput: '',
       lastNameInput: '',
       passwordInput: '',
-      placeHolder: ''
+      placeHolder: '',
+      loginModel: {
+        userName: '',
+        password: ''
+      }
     }
    } 
 
-  // getFnameValue = () => { 
-  //   let val = '';
-  //   let stateFname = this.state.firstNameInput;
-  //   let modelFname = this.props.personModel.fName;
-  //   if(stateFname !== '') {
-  //     //always use state value if it has been set
-  //     val = stateFname;
-  //   } else if (modelFname) {
-  //     //use model value when editing existing person, where state has not been set
-  //     val = modelFname;
-  //   }
-  //   //return default empty value if neither state nor model has been set 
-  //   console.log('set fname val to: '+val);
-  //   return val;
-  // }
-
-  // getCategoryStyleClass = () => {
-  //   if (this.state.categoryInput === '' && !this.props.personModel.category) {
-  //     return "disabledItem";
-  //   } else {
-  //     return "selectedItem";
-  //   }
-  // }
- 
-  handleSubmit = (e) => {
-      e.preventDefault();
-      var person = this.updatePersonModel();
-      this.props.handlePersonValSubmit(person, e);  
+  showProfile = () => {
+    if (this.props.actionType === "update" || this.props.showProfile) {
+      return true;
+    }
+    return false;
   }
 
-  // handleSelect = (e) => {
-  //   this.setState({ categoryInput: e.target.value });   
-  // }
+  getUserNameValue = () => {
+    if (this.props.actionType === "update") {
+      this.setState({loginModel: { userName : this.props.globalLoginModel.userName}});
+    }
+  }
+
+  getPasswordValue = () => {
+    if (this.props.actionType === "update") {
+      this.setState({loginModel: { password: this.props.globalLoginModel.password}});
+    }
+  }
+
+  handlePersonFormSubmit = (e) => {
+   if (!this.props.showProfile) {
+      this.handleSubmitUser(e);
+   } else if (this.props.showProfile && this.props.actionType === "update") {
+     this.handleSubmitUser(e);
+     this.handleSubmitPerson(e);
+   } else {
+     this.handleSubmitPerson(e);
+   }
+  }
+
+  handleSubmitPerson = (e) => {
+    e.preventDefault();
+    var person = this.updatePersonModel();
+    if (this.validPerson(person)) {
+      this.props.handlePersonSubmit(person, e);  
+    }
+  }
+
+  handleSubmitUser = (e) => {
+    e.preventDefault();
+    var user = this.updateLoginModel();
+    if (this.validUser(user)) {
+      this.props.handleUserSubmit(user, e);
+    }
+  }
 
   handleCancel = () => {
     console.log('handleCancel');
-    return this.props.handleClose;
+    this.props.handleClose();
+  }
+
+  handleError = (message) => {
+    this.setState({error: message});
+  }
+
+  updateLoginModel = () => {
+    var loginModel = this.state.loginModel;
+
+    if (this.state.userNameInput) {
+      loginModel.userName = this.state.userNameInput;
+    }
+
+    if (this.state.passwordInput) {
+      loginModel.password = this.state.passwordInput;
+    }  
+
+    return loginModel;
   }
 
   updatePersonModel = () => {
     var personModel = this.props.personModel;
+    var user = this.state.loginModel.userName;
+  
+    if (user) {
+      personModel.userName = user;
+      personModel.adminId = this.props.adminId;
 
-    if (this.state.firstNameInput) {
-      personModel.fName = this.state.firstNameInput;
+      if (this.state.firstNameInput) {
+        personModel.fName = this.state.firstNameInput;
+      }
+
+      if (this.state.lastNameInput) {
+        personModel.lName = this.state.lastNameInput;
+      }  
+
+      return personModel;
+    } else {
+      this.handleError("Error: can't create profile without username.");
     }
+  }
 
-    if (this.state.lastNameInput) {
-      personModel.lName = this.state.lastNameInput;
-    }  
+  validPerson = (person) => {
+    if (!person.fName || !person.lName ) {
+        this.handleError('Please fill out all fields.');
+    } else {
+        //make sure any previous error is cleared
+        this.setState({error: ''});
+        return true;
+    }
+  }
 
-    return personModel;
+  validUser = (user) => {
+    if (!user.userName || !user.password) {
+      this.handleError('Please fill out all fields.');
+    } else {
+      this.setState({error: ''});
+      return true;
+    }
   }
   
   render () {
@@ -86,28 +148,27 @@ export default class PersonFormDialog extends Component {
           open={this.props.openPerson}
           maxWidth="md"
           aria-labelledby="form-dialog-title">
-            {this.state.login &&
+          {this.props.showLogin &&
           <DialogContent className={"personDialog"}>
             <StyledContent>
               {this.props.error}
-            </StyledContent>  
-            
+            </StyledContent>             
             <CustomTextField
               name="userName"
               required
-              defaultValue={this.props.personModel.userName || ''}
+              defaultValue={this.getUserNameValue}
               onChange={(e) => this.setState({userNameInput: e.target.value})}
               label="User Id"
             />        
             <CustomTextField
               name="password"
               required
-              defaultValue={this.props.personModel.userName || ''}
+              defaultValue={this.state.loginModel.password || ''}
               onChange={(e) => this.setState({passwordInput: e.target.value})}
               label="Password"
             /> 
             </DialogContent> }
-            { this.state.profile &&
+            { this.showProfile() &&
             <DialogContent>
              <CustomTextField
               name="firstName"
@@ -126,8 +187,11 @@ export default class PersonFormDialog extends Component {
          
           </DialogContent>}
           <DialogActions>
-            <Button onClick={this.handleSubmit} color="primary">
-                Save
+            <Button 
+              onClick={this.handlePersonFormSubmit} 
+              children={this.props.showProfile ? "Save" : "Next"} 
+              color="primary">
+                
             </Button>
             <Button onClick={this.handleCancel}>
                 Cancel
