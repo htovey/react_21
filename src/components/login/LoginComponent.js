@@ -13,7 +13,12 @@ class LoginComponent extends Component {
         this.state={
             toggleError: 'false',
             styleClass: 'showMe',
-            error: ''
+            error: '',
+            localLoginModel: {
+                "username": '',
+                "password": '',
+                "roleType": ''
+            }
         }
     }
 
@@ -30,7 +35,7 @@ class LoginComponent extends Component {
     }
 
     handleLoginError(message) {
-        console.log('LoginComponent handleError()');
+        console.log('LoginComponent handleLoginError()');
         if(this.props.openLogin === true) {
             this.setState({ error: message});
         }
@@ -38,12 +43,12 @@ class LoginComponent extends Component {
 
     validLogin = (username, password) => {
         if (!username && !password) {
-            this.handleError('Please enter User Id and Password.');
+            this.handleLoginError('Please enter User Id and Password.');
             return false;
         } else if (!username) {
-            this.handleError('Please enter a User Id.');    
+            this.handleLoginError('Please enter a User Id.');    
         } else if (!password) {
-            this.handleError('Please enter a Password');
+            this.handleLoginError('Please enter a Password');
         }else {
             //make sure any previous error is cleared
             this.setState({error: ''});
@@ -63,7 +68,7 @@ class LoginComponent extends Component {
             .then(json => {
                 console.log("LoginComponent handleClick() response");
                // this.setState({styleClass: 'hideMe'});
-                this.props.handleLoginSuccess(json, userToken);
+                this.props.handleLoginSuccess(json, userToken, username, password);
             })    
             .catch((error) => {
                 this.handleLoginError('Login failed. Please try again.');
@@ -80,7 +85,8 @@ class LoginComponent extends Component {
                     openLogin={this.props.openLogin} 
                     error={this.state.error} 
                     styleClass={this.state.styleClass} 
-                    handleLogin ={this.handleLogin}
+                    handleLogin={this.handleLogin}
+                    loginModel={this.state.localLoginModel}
                     />
                 </div>        
             </div>

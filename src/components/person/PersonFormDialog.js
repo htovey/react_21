@@ -9,7 +9,6 @@ import '../../styles/App.css';
 import { withStyles } from '@material-ui/styles';
 import { MenuItem, FormControl } from '@material-ui/core';
 import Select from '@material-ui/core/Select';
-import { CATEGORIES } from '../../constants/Categories'
 import WaitModalComponent from '../modals/WaitModalComponent';
 
 export default class PersonFormDialog extends Component {
@@ -17,68 +16,114 @@ export default class PersonFormDialog extends Component {
   constructor(props) {
     super(props);
     this.state={
+      error: '',
       userNameInput: '',
       firstNameInput: '',
       lastNameInput: '',
-      placeHolder: ''
+      roleInput: '',
+      passwordInput: '',
+      placeHolder: '',
+      createLogin: true,
+      createProfile: false,
     }
    } 
 
-  // getFnameValue = () => { 
-  //   let val = '';
-  //   let stateFname = this.state.firstNameInput;
-  //   let modelFname = this.props.personModel.fName;
-  //   if(stateFname !== '') {
-  //     //always use state value if it has been set
-  //     val = stateFname;
-  //   } else if (modelFname) {
-  //     //use model value when editing existing person, where state has not been set
-  //     val = modelFname;
-  //   }
-  //   //return default empty value if neither state nor model has been set 
-  //   console.log('set fname val to: '+val);
-  //   return val;
-  // }
+  getRoleValue = () => { 
+    let val = '';
+    let stateRole = this.state.roleInput;
+    let modelRole = this.props.loginModel.role;
+    if(stateRole !== '') {
+      //always use state value if it has been set
+      val = stateRole;
+    } else if (modelRole) {
+      //use model value when editing existing note, where state has not been set
+      val = modelRole;
+    }
+    //return default empty value if neither state nor model has been set 
+    console.log('set Role val to: '+val);
+    return val;
+  }
 
-  // getCategoryStyleClass = () => {
-  //   if (this.state.categoryInput === '' && !this.props.personModel.category) {
-  //     return "disabledItem";
-  //   } else {
-  //     return "selectedItem";
-  //   }
-  // }
- 
   handleSubmit = (e) => {
       e.preventDefault();
       var person = this.updatePersonModel();
       this.props.handlePersonValSubmit(person, e);  
   }
 
-  // handleSelect = (e) => {
-  //   this.setState({ categoryInput: e.target.value });   
-  // }
+  handleSubmitUser = (e) => {
+    e.preventDefault();
+    var user = this.updateLoginModel();
+    if (this.validUser(user)) {
+      this.props.handleUserSubmit(user, e);
+    }
+  }
 
   handleCancel = () => {
     console.log('handleCancel');
-    return this.props.handleClose;
+    this.props.handleClose();
+  }
+
+  handleError = (message) => {
+    this.setState({error: message});
+  }
+
+  handleSelect = (e) => {
+    this.setState({ roleInput: e.target.value });   
+  }
+
+  updateLoginModel = () => {
+    var loginModel = this.state.loginModel;
+
+    if (this.state.userNameInput) {
+      loginModel.userName = this.state.userNameInput;
+    }
+
+    if (this.state.passwordInput) {
+      loginModel.password = this.state.passwordInput;
+    }  
+
+    return loginModel;
   }
 
   updatePersonModel = () => {
     var personModel = this.props.personModel;
+    var user = this.state.loginModel.userName;
+  
+    if (user) {
+      personModel.userName = user;
+      personModel.adminId = this.props.adminId;
 
-    if (this.state.userNameInput) {
-      personModel.userName = this.state.userNameInput;
+      if (this.state.firstNameInput) {
+        personModel.fName = this.state.firstNameInput;
+      }
+
+      if (this.state.lastNameInput) {
+        personModel.lName = this.state.lastNameInput;
+      }  
+
+      return personModel;
+    } else {
+      this.handleError("Error: can't create profile without username.");
     }
+  }
 
-    if (this.state.firstNameInput) {
-      personModel.fName = this.state.firstNameInput;
+  validPerson = (person) => {
+    if (!person.fName || !person.lName ) {
+        this.handleError('Please fill out all fields.');
+    } else {
+        //make sure any previous error is cleared
+        this.setState({error: ''});
+        return true;
     }
+  }
 
-    if (this.state.lastNameInput) {
-      personModel.lName = this.state.lastNameInput;
-    }  
-
-    return personModel;
+  validUser = (user) => {
+    if (!user.userName || !user.password) {
+      this.handleError('Please fill out all fields.');
+    } else {
+      this.setState({error: ''});
+      return true;
+    }
   }
   
   render () {
@@ -89,17 +134,28 @@ export default class PersonFormDialog extends Component {
           open={this.props.openPerson}
           maxWidth="md"
           aria-labelledby="form-dialog-title">
+            {this.state.createLogin &&
           <DialogContent className={"personDialog"}>
             <StyledContent>
               {this.props.error}
-            </StyledContent>  
+            </StyledContent>             
             <CustomTextField
               name="userName"
               required
-              defaultValue={this.props.personModel.userName || ''}
+              defaultValue={this.getUserNameValue}
               onChange={(e) => this.setState({userNameInput: e.target.value})}
               label="User Id"
-            />          
+            />        
+            <CustomTextField
+              name="password"
+              required
+              defaultValue={this.props.globalLoginModel.password || ''}
+              onChange={(e) => this.setState({passwordInput: e.target.value})}
+              label="Password"
+            /> 
+            </DialogContent> }
+            { this.state.createProfile &&
+            <DialogContent>
              <CustomTextField
               name="firstName"
               required
@@ -114,11 +170,24 @@ export default class PersonFormDialog extends Component {
               onChange={(e) => this.setState({lastNameInput: e.target.value})}
               label="Last Name"
             />
+             <Select
+              value={this.getRoleValue()}
+              displayEmpty
+              onChange={ (e) => this.handleSelect(e) }
+              name="role"
+              //className={this.getroleStyleClass()}
+              variant="outlined"
+              margin="dense"
+              required
+              fullWidth
+            >
+              {this.props.roleList}
+            </Select> 
          
-          </DialogContent>
+          </DialogContent>}
           <DialogActions>
-            <Button onClick={this.handleSubmit} color="primary">
-                Save
+            <Button onClick={this.handleSubmit} color="primary" label={"Hello"}>
+                
             </Button>
             <Button onClick={this.handleCancel}>
                 Cancel
