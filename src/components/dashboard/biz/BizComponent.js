@@ -57,8 +57,6 @@ class BizComponent extends Component {
             "type" : biz.bizType,
             "adminId" : this.props.adminId
         }
-        
-        this.props.handleBizSubmit(url, payload, e);
     }
 
     render() {

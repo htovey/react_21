@@ -1,6 +1,9 @@
- const handleGet = (methodUrl, userToken) => {
+ const handleGet = (methodUrl, userToken, params) => {
     var host = process.env.REACT_APP_API_URL || 'http://34.68.202.207:8080';
-    var url = host+methodUrl;
+    var url = new URL(host+methodUrl);
+    if (params) {
+        url.search = new URLSearchParams(params).toString();
+    }
     var result =  fetch( url, {
         method: "GET",
         headers: {

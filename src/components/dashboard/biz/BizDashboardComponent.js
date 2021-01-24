@@ -11,11 +11,14 @@ import BizModel from '../../../models/BizModel';
 import BizComponent from './BizComponent';
 import BizListComponent from './BizListToolbarSelect'; 
 import CustomSnackBar from '../../custom/CustomSnackBar';
+import PersonComponent from '../../person/PersonComponent';
 import FetchUtil from '../../../utils/FetchUtil';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
+    color: "navy",
+    text: 32
   },
   paper: {
     padding: theme.spacing(1),
@@ -31,28 +34,39 @@ class BizDashboardComponent extends Component {
      this.state = {
         openBizForm: false,
         bizModel: {
-            id: '',
-            name: '',
-            type: ''
+            id: props.bizModel.id,
+            name: props.bizModel.name,
+            type: props.bizModel.type
+        },
+        personModel: {
+          id: '',
+          fName: '',
+          lName: '',
+          adminId: ''
+        },
+        loginModel: {
+          userName: props.loginModel.userName,
+          password: props.loginModel.password,
+          roleType: props.loginModel.roleType || 'changeme'
         },
         bizList: [],
         roleList: [],
         actionType: '',
         snackBarOpen: false,
+        openPerson: false,
         vertical: 'top',
         horizontal: 'center',
         loading: false
      }
   }
   
-  editPerson = () => {
-    //this.props.getBizDataAndSetAction();
-    //this.props.viewProfile("update");
+  editBiz = () => {
+    this.toggleBiz("update");
   } 
 
   createPerson = (e) => {
     this.getRoleList(this.state.bizModel.type, e);
-    this.props.togglePerson("create");
+    this.togglePerson("create");
   }
 
   createBiz = () => {
@@ -73,11 +87,17 @@ class BizDashboardComponent extends Component {
     this.setState({openBizForm: !this.state.openBizForm});
   }
 
-  togglePerson = (actiontype, roleId) => {
-    console.log("biz dashboard - toggle person");
-    if (actiontype === "create") {
-      
+  togglePerson = (toggleActionType) => {
+    console.log('toggle biz person');
+    if(toggleActionType === "create") {
+      this.setLoginModel();
     }
+
+    // if (this.state.showPersonList) {
+    //   this.refreshPersonList()
+    // };
+    this.setState({actionType: toggleActionType});
+    this.setState({openPerson: !this.state.openPerson});
   }
 
   setBizModel = (biz) => {
@@ -94,28 +114,27 @@ class BizDashboardComponent extends Component {
       this.setState({loginModel: this.props.loginModel});
     }
   }
-  getBizDataAndSetAction = (updateBizModel) => {
-    if (updateBizModel) {
-      console.log("updating biz model");
-      this.setState({bizModel: {
-        id: updateBizModel.id,
-        name: updateBizModel.name,
-        type: updateBizModel.type
-      }, actionType: "update"});
-    } else if (this.state.bizModel) {
-      this.setState({actionType: "update"});
-    } else {
-      this.setState({actionType: "create"});
-    }
-    this.setState({openBizForm: true});
-  }
+  // getBizDataAndSetAction = (updateBizModel) => {
+  //   if (updateBizModel) {
+  //     console.log("updating biz model");
+  //     this.setState({bizModel: {
+  //       id: updateBizModel.id,
+  //       name: updateBizModel.name,
+  //       type: updateBizModel.type
+  //     }, actionType: "update"});
+  //   } else if (this.state.bizModel) {
+  //     this.setState({actionType: "update"});
+  //   } else {
+  //     this.setState({actionType: "create"});
+  //   }
+  //   this.setState({openBizForm: true});
+  // }
 
   getRoleList = (bizType, e) => {
     e.preventDefault();
     var params = {"bizType" : bizType};
     var url = "/roles";
-    url.search = new URLSearchParams(params).toString();
-    FetchUtil.handleGet(url, this.props.userToken)
+    FetchUtil.handleGet(url, this.props.userToken, params)
     .then(response => response.json())
     .then(json => {
       this.setState({roleList: json});
@@ -129,7 +148,7 @@ class BizDashboardComponent extends Component {
   handlePostSubmit = (url, payload, event) => {
     event.preventDefault();
     //build person payload
-    
+    var response = 'success';
     this.setState({loading: true});
     FetchUtil.handlePost(url, this.props.userToken, JSON.stringify(payload))
         .then(response => {
@@ -140,8 +159,10 @@ class BizDashboardComponent extends Component {
         })    
         .catch((error) => {
             console.log(error);
+            response = 'error';
             this.handleError('Save failed. Please try again.');
         }); 
+        return response;
   }
 
   handleCRUDSuccess = (action) => {
@@ -184,22 +205,20 @@ class BizDashboardComponent extends Component {
                 <Grid container spacing={2}>
                   <Grid item xs={2}>
                     <Card className={classes.paper}>
-                      <Typography>
-                        New Biz
-                      </Typography>
+                      <Typography>{this.state.bizModel.name}</Typography>
                       <CardActions>
-                        <Button onClick={this.createBiz}>Add Biz</Button> 
-                        <Button onClick={this.createBizAdmin}>Add Biz Admin</Button>
+                        <Button onClick={this.editBiz}>Update Info</Button> 
                       </CardActions>
                     </Card>
                   </Grid>
                   <Grid item xs={2}>
                     <Card className={classes.paper}>
                       <Typography>
-                        Biz Profiles
+                        Admin Profiles
                       </Typography>
                       <CardActions>
-                        <Button onClick={this.props.getBizList}>View</Button>
+                        <Button onClick={this.props.getBizList}>View Admin List</Button>
+                        <Button onClick={this.createPerson}>Add Biz Admin</Button>
                       </CardActions>
                     </Card>
                   </Grid>
@@ -210,12 +229,12 @@ class BizDashboardComponent extends Component {
                     userToken={this.props.userToken} 
                     adminId={this.props.adminId}
                     openBizForm={this.state.openBizForm}
-                    handleSuccess={this.handleCRUDSuccess}s
+                    handleSuccess={this.handleCRUDSuccess}
                     bizModel={this.state.bizModel}
                     loginModel={this.props.loginModel}
-                    handleBizSubmit={this.handlePostSubmit}
                     handleClose={this.toggleBiz}
                     actionType={this.state.actionType}
+                    handleSubmit={this.handlePostSubmit}
                 />
             }
             {this.openBizList &&
@@ -227,6 +246,19 @@ class BizDashboardComponent extends Component {
                     getBizData={this.getBizData}
                 />
             }
+            {this.state.openPerson &&
+            <PersonComponent 
+              userToken={this.props.userToken} 
+              adminId={this.props.adminId}
+              openPerson={this.state.openPerson}
+              handleSuccess={this.handleCRUDSuccess}s
+              personModel={this.state.personModel}
+              loginModel={this.state.loginModel}
+              handlePersonSubmit={this.handleSubmit}
+              handleClose={this.togglePerson}
+              actionType={this.state.actionType}
+              roleList={this.state.roleList}
+            />}    
         </div>
       );
    }

@@ -269,6 +269,7 @@ class App extends Component {
               appPersonModel={this.state.personModel}
               userToken={this.state.userToken}
               handleSubmit={this.handleSubmit}
+              dateFormatter={this.getFormattedDate}
             />}  
           {this.state.showPersonList && 
             <PersonListComponent 

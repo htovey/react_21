@@ -89,6 +89,22 @@ class PersonComponent extends Component {
         //}
     };
 
+    getRoleList = (bizType, e) => {
+        e.preventDefault();
+        var params = {"bizType" : bizType};
+        var url = "/roles";
+        url.search = new URLSearchParams(params).toString();
+        FetchUtil.handleGet(url, this.props.userToken)
+        .then(response => response.json())
+        .then(json => {
+          this.setState({roleList: json});
+        })
+        .catch((error) => {
+          console.log(error);
+          this.handleError('get role list failed. Please try again.');
+        }); 
+      }
+
     render() {
        
         return (
@@ -107,6 +123,7 @@ class PersonComponent extends Component {
                         showLogin={this.state.showUser}
                         showProfile={this.state.showProfile}
                         adminId={this.props.adminId}
+                        roleList={this.props.roleList}
                     />          
                 </div>        
             </div>

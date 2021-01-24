@@ -41,16 +41,15 @@ export default class BizFormDialog extends Component {
     return false;
   }
 
-  getBizNameValue = () => {
-    if (this.props.actionType === "update") {
-      this.setState({bizModel: { userName : this.props.globalLoginModel.userName}});
-    }
-  }
+  // getBizNameValue = () => {
+  //   let val = '';
+  //   let stateBizName 
+  // }
 
   getBizTypeValue = () => {
     let val = '';
     let stateBizType = this.state.bizTypeInput;
-    let modelBizType = this.props.bizModel.bizType;
+    let modelBizType = this.props.bizModel.type;
     if(stateBizType !== '') {
       val = stateBizType;
     } else if (modelBizType) {
@@ -63,7 +62,7 @@ export default class BizFormDialog extends Component {
     this.setState({ bizTypeInput: e.target.value });   
   }
 
-  handleSubmitBiz = (e) => {
+  handleSubmit = (e) => {
     e.preventDefault();
     var biz = this.updateBizModel();
     if (this.validBiz(biz)) {
@@ -88,14 +87,14 @@ export default class BizFormDialog extends Component {
     }
 
     if (this.state.bizTypeInput) {
-      bizModel.bizType = this.state.bizTypeInput;
+      bizModel.type = this.state.bizTypeInput;
     }  
 
     return bizModel;
   }
 
   validBiz = (biz) => {
-    if (!biz.name || !biz.bizType) {
+    if (!biz.name || !biz.type) {
         this.handleError('Please fill out all fields.');
     } else {
         //make sure any previous error is cleared
@@ -119,12 +118,12 @@ export default class BizFormDialog extends Component {
             <CustomTextField
               name="name"
               required
-              defaultValue={this.getBizNameValue}
+              defaultValue={this.state.bizNameInput || this.props.bizModel.name || ''}
               onChange={(e) => this.setState({bizNameInput: e.target.value})}
               label="Business Name"
             />        
             <Select
-              value={this.getBizTypeValue()}
+              value={this.state.bizTypeInput || this.props.bizModel.type || ''}
               displayEmpty
               onChange={ (e) => this.handleSelect(e) }
               name="type"
@@ -139,10 +138,9 @@ export default class BizFormDialog extends Component {
             </DialogContent> 
           <DialogActions>
             <Button 
-              onClick={this.handleSubmitBiz} 
+              onClick={this.handleSubmit} 
               children={"Save"}
-              color="primary">
-                
+              color="primary">              
             </Button>
             <Button onClick={this.handleCancel}>
                 Cancel
