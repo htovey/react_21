@@ -9,7 +9,6 @@ import '../../styles/App.css';
 import { withStyles } from '@material-ui/styles';
 import { MenuItem, FormControl } from '@material-ui/core';
 import Select from '@material-ui/core/Select';
-import { CATEGORIES } from '../../constants/Categories'
 import WaitModalComponent from '../modals/WaitModalComponent';
 
 export default class PersonFormDialog extends Component {
@@ -21,51 +20,34 @@ export default class PersonFormDialog extends Component {
       userNameInput: '',
       firstNameInput: '',
       lastNameInput: '',
+      roleInput: '',
       passwordInput: '',
       placeHolder: '',
-      loginModel: {
-        userName: '',
-        password: ''
-      }
+      createLogin: true,
+      createProfile: false,
     }
    } 
 
-  showProfile = () => {
-    if (this.props.actionType === "update" || this.props.showProfile) {
-      return true;
+  getRoleValue = () => { 
+    let val = '';
+    let stateRole = this.state.roleInput;
+    let modelRole = this.props.loginModel.role;
+    if(stateRole !== '') {
+      //always use state value if it has been set
+      val = stateRole;
+    } else if (modelRole) {
+      //use model value when editing existing note, where state has not been set
+      val = modelRole;
     }
-    return false;
+    //return default empty value if neither state nor model has been set 
+    console.log('set Role val to: '+val);
+    return val;
   }
 
-  getUserNameValue = () => {
-    if (this.props.actionType === "update") {
-      this.setState({loginModel: { userName : this.props.globalLoginModel.userName}});
-    }
-  }
-
-  getPasswordValue = () => {
-    if (this.props.actionType === "update") {
-      this.setState({loginModel: { password: this.props.globalLoginModel.password}});
-    }
-  }
-
-  handlePersonFormSubmit = (e) => {
-   if (!this.props.showProfile) {
-      this.handleSubmitUser(e);
-   } else if (this.props.showProfile && this.props.actionType === "update") {
-     this.handleSubmitUser(e);
-     this.handleSubmitPerson(e);
-   } else {
-     this.handleSubmitPerson(e);
-   }
-  }
-
-  handleSubmitPerson = (e) => {
-    e.preventDefault();
-    var person = this.updatePersonModel();
-    if (this.validPerson(person)) {
-      this.props.handlePersonSubmit(person, e);  
-    }
+  handleSubmit = (e) => {
+      e.preventDefault();
+      var person = this.updatePersonModel();
+      this.props.handlePersonValSubmit(person, e);  
   }
 
   handleSubmitUser = (e) => {
@@ -83,6 +65,10 @@ export default class PersonFormDialog extends Component {
 
   handleError = (message) => {
     this.setState({error: message});
+  }
+
+  handleSelect = (e) => {
+    this.setState({ roleInput: e.target.value });   
   }
 
   updateLoginModel = () => {
@@ -148,7 +134,7 @@ export default class PersonFormDialog extends Component {
           open={this.props.openPerson}
           maxWidth="md"
           aria-labelledby="form-dialog-title">
-          {this.props.showLogin &&
+            {this.state.createLogin &&
           <DialogContent className={"personDialog"}>
             <StyledContent>
               {this.props.error}
@@ -163,12 +149,12 @@ export default class PersonFormDialog extends Component {
             <CustomTextField
               name="password"
               required
-              defaultValue={this.state.loginModel.password || ''}
+              defaultValue={this.props.globalLoginModel.password || ''}
               onChange={(e) => this.setState({passwordInput: e.target.value})}
               label="Password"
             /> 
             </DialogContent> }
-            { this.showProfile() &&
+            { this.state.createProfile &&
             <DialogContent>
              <CustomTextField
               name="firstName"
@@ -184,13 +170,23 @@ export default class PersonFormDialog extends Component {
               onChange={(e) => this.setState({lastNameInput: e.target.value})}
               label="Last Name"
             />
+             <Select
+              value={this.getRoleValue()}
+              displayEmpty
+              onChange={ (e) => this.handleSelect(e) }
+              name="role"
+              //className={this.getroleStyleClass()}
+              variant="outlined"
+              margin="dense"
+              required
+              fullWidth
+            >
+              {this.props.roleList}
+            </Select> 
          
           </DialogContent>}
           <DialogActions>
-            <Button 
-              onClick={this.handlePersonFormSubmit} 
-              children={this.props.showProfile ? "Save" : "Next"} 
-              color="primary">
+            <Button onClick={this.handleSubmit} color="primary" label={"Hello"}>
                 
             </Button>
             <Button onClick={this.handleCancel}>
