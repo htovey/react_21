@@ -183,7 +183,7 @@ class DashboardComponent extends Component {
                 <Grid item xs={2}>
                   <Card className={classes.paper}>
                     <Typography>
-                      Team Profiles
+                      Biz Profiles
                     </Typography>
                     <CardActions>
                       <Button onClick={this.getBizList}>View Biz List</Button>

@@ -10,7 +10,7 @@ class BizComponent extends Component {
         super(props);
         this.state={
             styleClass: 'showMe',
-            error: ''
+          //  error: ''
         }
     }
  
@@ -29,12 +29,12 @@ class BizComponent extends Component {
         // }
     }
 
-    handleError(message) {
-        console.log('Biz Component handleError()');
-        if(this.props.openBiz === true) {
-            this.setState({ error: message});
-        }
-    }
+    // handleError(message) {
+    //     console.log('Biz Component handleError()');
+    //     if(this.props.openBiz === true) {
+    //         this.setState({ error: message});
+    //     }
+    // }
 
     handleSubmitBizSuccess(username) {
         if (this.props.actionType === "create") {
@@ -50,13 +50,7 @@ class BizComponent extends Component {
     handleBizSubmit = (biz, e) => {
         e.preventDefault();
         this.setState({loading: true});
-
-        const url = "/biz/"+this.props.actionType;
-        const payload = {
-            "name" : biz.name,
-            "type" : biz.bizType,
-            "adminId" : this.props.adminId
-        }
+        this.props.handleSubmit(biz, e);
     }
 
     render() {
@@ -66,7 +60,7 @@ class BizComponent extends Component {
                 <div>     
                     <BizFormDialog 
                         openBizForm={this.props.openBizForm} 
-                        error={this.state.error} 
+                        error={this.props.error} 
                         styleClass={this.state.styleClass} 
                         handleBizSubmit={this.handleBizSubmit}
                         bizModel={this.props.bizModel}

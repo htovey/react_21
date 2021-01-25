@@ -32,6 +32,7 @@ class BizDashboardComponent extends Component {
   constructor(props) {
      super(props);
      this.state = {
+        error: '',
         openBizForm: false,
         bizModel: {
             id: props.bizModel.id,
@@ -79,10 +80,6 @@ class BizDashboardComponent extends Component {
       this.setBizModel();
       this.setLoginModel();
     }
-
-    // if (this.state.showBizList) {
-    //   this.refreshBizList()
-    // };
     this.setState({actionType: actiontype});
     this.setState({openBizForm: !this.state.openBizForm});
   }
@@ -145,24 +142,31 @@ class BizDashboardComponent extends Component {
     }); 
   }
 
-  handlePostSubmit = (url, payload, event) => {
-    event.preventDefault();
-    //build person payload
-    var response = 'success';
-    this.setState({loading: true});
-    FetchUtil.handlePost(url, this.props.userToken, JSON.stringify(payload))
-        .then(response => {
-            if (response.status === 200 || response.status === 201) {
-                console.log("Success***");
-                this.handleCRUDSuccess(this.state.actionType);
-            }
-        })    
-        .catch((error) => {
-            console.log(error);
-            response = 'error';
-            this.handleError('Save failed. Please try again.');
-        }); 
-        return response;
+  handleBizSubmit = (biz, e) => {
+    const url = "/biz/"+this.state.actionType;
+    const payload = {
+        "name" : biz.name,
+        "type" : null,
+        "id" : biz.id
+    }
+    var response = FetchUtil.handlePost(url, this.props.userToken, JSON.stringify(payload));
+    response
+    // .then(response => {
+    //   if (response.status === 200 || response.status === 201) {
+    //       this.setBizModel(biz);
+    //       this.handleCRUDSuccess(this.state.actionType);
+    //   }
+    // })    
+    .then(response => response.json())
+            .then(json => {
+                console.log("BizDashboard handleClick() response");
+               // this.setState({styleClass: 'hideMe'});
+               // this.props.handleLoginSuccess(json, userToken, username, password);
+            }) 
+    .catch((error) => {
+      console.log("ERROR:  "+error);
+      this.handleError('Save failed. Please try again.');
+    });
   }
 
   handleCRUDSuccess = (action) => {
@@ -173,6 +177,13 @@ class BizDashboardComponent extends Component {
     });
     this.setState({snackBarOpen: true});
    // this.refreshPersonList();
+  }
+
+  handleError(message) {
+    console.log('Biz Dashboard handleError()');
+    if(this.props.openBizForm === true) {
+        this.setState({ error: message});
+    }
   }
 
   getSnackbarMsg = () => {
@@ -226,6 +237,7 @@ class BizDashboardComponent extends Component {
             </Grid>
             {this.state.openBizForm &&
                 <BizComponent
+                    error={this.state.error}
                     userToken={this.props.userToken} 
                     adminId={this.props.adminId}
                     openBizForm={this.state.openBizForm}
@@ -234,7 +246,7 @@ class BizDashboardComponent extends Component {
                     loginModel={this.props.loginModel}
                     handleClose={this.toggleBiz}
                     actionType={this.state.actionType}
-                    handleSubmit={this.handlePostSubmit}
+                    handleSubmit={this.handleBizSubmit}
                 />
             }
             {this.openBizList &&
