@@ -44,7 +44,7 @@ class PersonListToolbarSelect extends Component {
             if (response.status === 200) {
                 this.setState({loading : false});
                 console.log("Delete: Success***");
-                this.props.handleSuccess("delete");
+                this.props.handleSuccess("delete", "Person");
                 this.resetRows();
             }
         })
@@ -55,9 +55,10 @@ class PersonListToolbarSelect extends Component {
         });
     }
 
-    editPerson = () => {
-        var updatePerson = this.props.personList[this.props.selectedRows.data[0].index];
-        this.props.getPersonFormData(updatePerson);
+     editPerson = () => {
+    //     var updatePerson = this.props.personList[this.props.selectedRows.data[0].index];
+    //     this.props.getPersonFormData(updatePerson);
+        this.props.editPerson(this.props.selectedRows.data[0].index);
     }
 
     getPersonIdList = (selectedRows) => {

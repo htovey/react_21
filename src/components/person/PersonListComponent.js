@@ -8,29 +8,36 @@ import PersonListToolbar from './PersonListToolbar';
 export default function PersonListComponent(props) {
     const columns = [
         {
-            name: "personId",
-            label: "Person Id",
+            name: "id",
+            label: "ID",
             options: {
                 display: 'excluded'
             }
         },
         {
-            name: "category",
-            label: "Category",
+            name: "userName",
+            label: "User Name",
             options: {
                 filter: true
             }
         },
         {
-            name: "personText",
-            label: "Person",
+            name: "fName",
+            label: "First Name",
             options: {
-                filter: true,
-                setCellProps: value => ({ style: { width: '75%' } }),
+                filter: true
             }
         },
         {
-            name: "lastUpdated",
+            name: "lName",
+            label: "Last Name",
+            options: {
+                filter: true,
+                //setCellProps: value => ({ style: { width: '75%' } }),
+            }
+        },
+        {
+            name: "saveDate",
             label: "Last Updated",
             options: {
                 filter: true
@@ -44,11 +51,13 @@ export default function PersonListComponent(props) {
         responsive: "vertical",
         selectableRows: true,
         selectToolbarPlacement: "above",
+        onRowClick: props.getPersonFormData,
         customToolbarSelect: (selectedRows, displayData, setSelectedRows) => (
             <PersonListToolbarSelect 
                 className={"selectToolbar"}
                 selectedRows={selectedRows}
-                personList={props.persons}
+                personList={props.personList}
+                editPerson={props.editPerson}
                 getPersonFormData={props.getPersonFormData}
                 userToken={props.userToken}
                 handleSuccess={props.handleSuccess}
@@ -63,8 +72,9 @@ export default function PersonListComponent(props) {
             root: {
                 backgroundColor: 'purple',
             },
+            
             paper: {
-                boxShadow: 'none',
+                boxShadow: '2px',
             },
             },
             MUIDataTableToolbarSelect: {
@@ -99,7 +109,7 @@ export default function PersonListComponent(props) {
     return (
         <MuiThemeProvider theme={getMuiTheme}>
             <MUIDataTable 
-                data={props.persons}
+                data={props.personList}
                 columns={columns}
                 options={options}     
             />

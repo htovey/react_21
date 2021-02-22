@@ -44,7 +44,7 @@ class BizListToolbarSelect extends Component {
             if (response.status === 200) {
                 this.setState({loading : false});
                 console.log("Delete: Success***");
-                this.props.handleSuccess("delete");
+                this.props.handleSuccess("delete", "Biz");
                 this.resetRows();
             }
         })
