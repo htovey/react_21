@@ -9,24 +9,27 @@ import '../../styles/App.css';
 import { withStyles } from '@material-ui/styles';
 import CustomTextField from '../custom/CustomTextField';
 
-export default function LoginFormDialog (props) {
+export default function ResetPasswordDialog(props) {
 
    let unameRef = '';
    let pwRef = '';
 
   const handleEnterKey = (e) => {
-    if(e.key === "Enter") {
-      handleLoginSubmit(e);
+    if(e.key === "Enter"){
+        if(props.showPassword) {
+            handleResetSubmit(e);
+        } else {
+            handleUserLookup(e);
+        }
     }
   }
 
-  const passwordReset = (e) => {
-    props.passwordReset();
+  const handleUserLookup = (e) => {
+    props.handleResetUserLookup(unameRef.value, e);
   }
 
-  const handleLoginSubmit = (e) => {
-    e.preventDefault();   
-    props.handleLogin(unameRef.value, pwRef.value, e);
+  const handleResetSubmit = (e) => {
+    props.handleResetPassword(unameRef.value, pwRef.value, e);
   }
 
   const StyledContent = withStyles({root: {color : 'red'}})(DialogContentText);
@@ -35,7 +38,7 @@ export default function LoginFormDialog (props) {
     
       <Dialog 
         className={"noteClass"}
-        open={props.openLogin}  
+        open={props.openResetForm} 
         aria-labelledby="form-dialog-title" 
         onKeyPress={(e) => handleEnterKey(e)} >
         <DialogContent>
@@ -43,30 +46,31 @@ export default function LoginFormDialog (props) {
             {props.error}
           </StyledContent>
           
-          <CustomTextField
+          {!props.showPassword && <CustomTextField
             autoFocus
             name="username"
             required
             inputRef={el => unameRef = el}
             label="User Id"
-            defaultValue={props.resetUser || ''}
-          />
-          <CustomTextField
+          />}
+            {props.showPassword && <CustomTextField
             name="password"
             required
             inputRef={el => pwRef = el} 
-            label="Password"
-            //defaultValue="hockey"
-          />
-        
+            label={"Reset Password for user "+props.resetLoginModel.username} 
+          />}       
         </DialogContent>
         <DialogActions>
-          <Link onClick={passwordReset}>Reset Password</Link>
-          <Button 
-            onClick={handleLoginSubmit}  
-            color="primary">
-              Login
-          </Button>
+            {props.showPassword && <Button 
+                onClick={handleResetSubmit} 
+                color="primary">
+                Reset
+            </Button>}
+            {!props.showPassword && <Button
+                onClick={handleUserLookup}
+            >
+            Request Reset
+            </Button>}
         </DialogActions>
       </Dialog>
       

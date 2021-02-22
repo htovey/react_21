@@ -59,14 +59,6 @@ export default function BizListComponent(props) {
 
     const getMuiTheme = createMuiTheme({
         overrides: {
-            MUIDataTable: {
-            root: {
-                backgroundColor: 'purple',
-            },
-            paper: {
-                boxShadow: 'none',
-            },
-            },
             MUIDataTableToolbarSelect: {
                root: {
                     backgroundColor: 'orange',
@@ -90,7 +82,7 @@ export default function BizListComponent(props) {
             },
             },
             MuiPaper: {
-                backgroundColor: 'red'
+                //backgroundColor: 'red'
             }
         },
         });  

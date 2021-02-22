@@ -13,17 +13,26 @@ class PersonComponent extends Component {
             styleClass: 'showMe person',
             error: '',
             showProfile: false,
-            showUser: true
+            showUser: true,
+            loginModel: {
+                userId: '',
+                userName: '',
+                password: '',
+                roleId: '',
+                roleName: '',
+                roleType: '',
+                bizId: ''
+            }
         }
     }
  
     componentDidUpdate(prevProps, prevState, snapshot) {
         console.log('PersonComponent componentDidUpdate()');
-        if (prevProps.openPerson !== this.props.openPerson) {
-           this.setState({openPerson: this.props.openPerson});
+        if (prevProps.openPersonForm !== this.props.openPersonForm) {
+           this.setState({openPersonForm: this.props.openPersonForm});
         }
         
-        if (!this.props.openPerson && this.state.error !== '') {
+        if (!this.props.openPersonForm && this.state.error !== '') {
             this.setState({error: ''});
         }
 
@@ -34,7 +43,7 @@ class PersonComponent extends Component {
 
     handleError(message) {
         console.log('PersonComponent handleError()');
-        if(this.props.openPerson === true) {
+        if(this.props.openPersonForm === true) {
             this.setState({ error: message});
         }
     }
@@ -45,8 +54,10 @@ class PersonComponent extends Component {
                 showUser: false,
                 showProfile: true,
             });
-            console.log("userName: "+this.state.personModel.userName);
+            console.log("userName: "+this.state.loginModel.userName);
             //this.setState({showProfile: true});
+        } else {
+            this.props.togglePerson("update");
         }
     }
 
@@ -56,9 +67,12 @@ class PersonComponent extends Component {
 
         const url = "/user/"+this.props.actionType;
         const payload = {
+            "id" : user.userId,
             "userName" : user.userName,
             "password" : user.password,
-            "adminId" : this.props.adminId
+            "adminId" : this.props.adminId,
+            "bizId" : this.props.bizId,
+            "roleId" : user.roleId
         }
 
         var response = FetchUtil.handlePost(url, this.props.userToken, JSON.stringify(payload))
@@ -74,55 +88,25 @@ class PersonComponent extends Component {
         });
     }
 
-    handlePersonSubmit = (person, e) => {
-        console.log('stop here');
-        const personUrl = "/person"
-        const personBody =  {
-            "id": person.id || "",
-            "fName": person.fName,
-            "lName": person.lName,
-            "userName": person.userName,
-        }
-               
-        //if (this.validPerson(person)) {
-            this.props.handlePersonSubmit(personUrl, personBody, e);
-        //}
-    };
-
-    getRoleList = (bizType, e) => {
-        e.preventDefault();
-        var params = {"bizType" : bizType};
-        var url = "/roles";
-        url.search = new URLSearchParams(params).toString();
-        FetchUtil.handleGet(url, this.props.userToken)
-        .then(response => response.json())
-        .then(json => {
-          this.setState({roleList: json});
-        })
-        .catch((error) => {
-          console.log(error);
-          this.handleError('get role list failed. Please try again.');
-        }); 
-      }
-
     render() {
        
         return (
             <div>       
                 <div>     
                     <PersonFormDialog 
-                        openPerson={this.props.openPerson} 
+                        openPerson={this.props.openPersonForm} 
                         error={this.state.error} 
                         styleClass={this.state.styleClass} 
-                        handlePersonSubmit={this.handlePersonSubmit}
+                        handlePersonSubmit={this.props.handlePersonSubmit}
                         handleUserSubmit={this.handleUserSubmit}
                         personModel={this.props.personModel}
-                        globalLoginModel={this.props.loginModel}
+                        loginModel={this.props.loginModel}
                         handleClose={this.props.handleClose}
                         actionType={this.props.actionType}
                         showLogin={this.state.showUser}
-                        showProfile={this.state.showProfile}
+                        showProfile={this.props.showProfileForm || this.state.showProfile}
                         adminId={this.props.adminId}
+                        bizId={this.props.bizId}
                         roleList={this.props.roleList}
                     />          
                 </div>        
